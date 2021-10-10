@@ -1,13 +1,35 @@
 #!/bin/bash
 
-help="usage: $0 [-o | --output <outputfile>, -p | --ports <ports>] -t <target>"
+printhelp() {
+echo "usage: $0 [options] <-t|--target> <target>
+	Options				Description
+	-h | --help			Shows this prompt
+	-t | --target <target>		Selects a target to scan (hostname or ip address permitted)
+	-o | --output <filename>	Sends the enumerated ports to the target output file. Default to stdout
+	-p | --ports <range>		Specifies the ports to check. Default: 1-65535
+	-s | --scanner <scannername>	Specifies the scanner program to use. Options: nmap, masscan
+
+	Examples							Description
+	
+	sh $0 -t google.com -p 1-1000 -s masscan	This scans the ip address that 'google.com' resolves to
+									over ports 1,2,3,4,..,1000 using masscan, printing output
+									to stdout.
+
+	sh $0 -t yahoo.com				This scans the ip address that 'yahoo.com' resolves to
+									over all ports (1-65535) using nmap, printing output to 
+									stdout.
+
+	sh $0 -t 192.168.0.1 -o ports.txt		This scans 192.168.0.1 over all ports using nmap and 
+									saves the output to the file 'ports.txt'
+		
+"
+}
 
 while [[ "$#" -gt 0 ]]; do
 	case $1 in
 		-h|--help) 
-			echo $help; # Print help
-			shift 
-			shift
+			printhelp
+			exit
 			;;
 		-t|--target) 
 			target="$2"; 
@@ -26,6 +48,10 @@ while [[ "$#" -gt 0 ]]; do
 			;;
 		-s|--scanner)
 			scanner="$2";
+			if [ -z "$scanner" ]; then
+				>&2 echo "Scanner option found, but no scanner specified"
+				exit
+			fi
 			shift
 			shift
 			;;
